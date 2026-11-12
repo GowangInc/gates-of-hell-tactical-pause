@@ -1,0 +1,16 @@
+# Default deny: this workspace also holds private saves, logs and research.
+/*
+!/.gitignore
+!/README.md
+!/CHANGELOG.md
+!/mod.info
+!/run_offline.py
+!/verify_build.py
+!/resource/
+/resource/*
+!/resource/script/
+/resource/script/*
+!/resource/script/gohse/
+/resource/script/gohse/*
+!/resource/script/gohse/bootstrap.lua
+!/resource/script/gohse/mod.json
