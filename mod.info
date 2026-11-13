@@ -1,6 +1,6 @@
 {mod
 	{name "gates-of-hell-tactical-pause"}
-	{desc "Single-player only: unlocks paused Conquest orders and preserves native campaign pause. Use run_offline.py. No MP/co-op."}
+	{desc "Single-player only: unlocks paused Conquest orders and preserves native campaign pause. Use run_offline.py after manual Steam setup. No MP/co-op."}
 	{minGameVersion "1.067.0"}
 	{maxGameVersion "1.067.0"}
 }

@@ -6,6 +6,14 @@
 !/mod.info
 !/run_offline.py
 !/verify_build.py
+!/install_shortcut.py
+!/AGENT_INSTALL.md
+!/docs/
+/docs/*
+!/docs/images/
+/docs/images/*
+!/docs/images/conquest-paused-orders.png
+!/docs/images/conquest-resumed-orders.png
 !/resource/
 /resource/*
 !/resource/script/

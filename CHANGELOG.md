@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.0 — 2026-11-13
+
+- Add a read-only-by-default shortcut installer, explicit code allowlist, private unique backups, symlink/overlap refusal and opt-in shortcut trust.
+- Validate Desktop Entry escaping through a native launcher, including paths with spaces, quotes, backslashes and literal field codes.
+- Add an agent-install guide and game-only README screenshots. Keep GOHSE and all profiles/saves/logs outside the download.
+- Keep Steam Offline Mode, this game's Cloud toggle and their restoration manual. The shortcut runs `run_offline.py`; no automatic Steam controller is distributed.
+- Reject a runtime/client exit before managed-patch activation is verified.
+- The native Lua pause implementation and exact supported game/loader builds are unchanged; the gameplay evidence is from the verified 0.3.2 implementation.
+
 ## 0.3.2 — 2026-11-12
 
 First public source release. Exact target: Gates of Hell 1.067.0 / Steam build 25492057; tested on Linux/Proton with GOHSE 0.1.1.

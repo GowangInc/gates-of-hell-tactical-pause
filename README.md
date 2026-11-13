@@ -2,7 +2,17 @@
 
 Experimental tactical pause for **solo Dynamic Conquest** in *Call to Arms – Gates of Hell: Ostfront*: freeze the battle, select different units, give native orders, then resume. This is a real pause, not slow motion. Ordinary single-player campaign active pause is left intact.
 
-**Version 0.3.2 · tested with game 1.067.0, Steam build 25492057, on one Linux/Proton system.** This is an expert/manual installation, not a general-purpose installer. No multiplayer or co-op support; no Windows or Steam Deck compatibility claim.
+**Version 0.4.0 · native pause tested with game 1.067.0, Steam build 25492057, on one Linux/Proton system.** Installation is still an expert, exact-build setup. **Steam setup and restoration are manual; the shortcut never changes Steam settings.** No multiplayer, co-op, Windows or Steam Deck compatibility claim.
+
+## Screenshots
+
+**Paused Conquest:** a selected squad and native waypoint markers, with the tactical-pause indicator visible.
+
+![Selected units and queued movement markers during tactical pause](docs/images/conquest-paused-orders.png)
+
+**After resume:** the officer and squad execute their separate orders.
+
+![Officer and squad moving after the battle resumes](docs/images/conquest-resumed-orders.png)
 
 ## What was tested
 
@@ -31,16 +41,19 @@ This is distributed outside Steam Workshop. Read the developers' [Workshop polic
   `8664a225b0615992834f7408d58ff1ae5df1c9e9eff8811d8e7c0f44f4d1c426`.
   Obtain it from the loader's own release, not an unsolicited DLL mirror. Read its installation notes and dependency notices.
 - Linux/X11, Python **3.9+** with Tk, and installed `socat`, `unshare`, `mount`, `bash`, `ip` and `xdotool`. Working rootless user/network/mount namespaces, pidfds and access to the owned game's `/proc/<pid>/mem` are required. Distribution security settings may refuse this; do not weaken system security settings as a workaround.
+- The shortcut helper needs `xdg-user-dir`; marking its shortcut trusted and running its optional native-parser self-check also use `gio`. No automatic Steam UI controller is included.
 - The launcher currently assumes Steam at `~/.steam/debian-installation`, with the game, **Proton Experimental** and **SteamLinuxRuntime_sniper** in that Steam library.
 - It bridges only the existing host-loopback Steam IPC ports **57343, 18183 and 27667** into a private network namespace. These were measured on the tested system, not established as portable Steam defaults. A different Steam layout/IPC arrangement needs separate investigation; do not forward gameplay traffic or substitute remote endpoints.
 - An already prepared, real, separate Proton prefix, defaulting to `~/.local/share/goh-tactical-pause/compatdata`, **outside the installed mod folder**. Use `--prefix /absolute/path/to/private-compatdata` to select an existing copy. The launcher does **not** install GOHSE, create this prefix, or migrate saves automatically.
 
 Unsupported executable hashes fail closed. Do not remove the checks or guess new offsets when the game updates.
 
-## Manual installation
+## Installation and AI-agent help
 
-1. **Close the game and back up your ordinary saves.** Let normal Cloud synchronization finish, then disable Steam Cloud **for Gates of Hell** and put Steam in **Offline Mode**. Leave Steam running.
-2. Obtain the release ZIP or source repository. The ZIP contains one `tactical_pause` folder; the source root contains the same files. Run the commands below from that installed folder.
+Give your agent **[AGENT_INSTALL.md](AGENT_INSTALL.md)**. It includes a copy-paste prompt, ordered checks, approval gates and stop conditions. An agent must inspect the real installation, not assume these measured paths/ports apply to every machine. GOHSE installation, Steam changes, shortcut trust and gameplay need the human's approval.
+
+1. **Close the game and back up your ordinary saves.** Let normal Steam Cloud synchronization finish. Record your initial Steam Online/Offline state and this game's Cloud toggle so you can restore only what you change.
+2. Obtain the release ZIP or source repository. The ZIP contains one `tactical_pause` folder; the source root contains the same project files. Run commands below from that folder.
 3. Install the matching GOHSE `version.dll` under the game's `binaries/x64`, following the loader's instructions. **Back up any existing `version.dll`; do not overwrite an unknown proxy or another loader.** This repository does not include or install that dependency.
 4. Extract the ZIP's `tactical_pause` folder into `<game>/gohse/mods/`. The resulting folder contains all of this project's runtime code and instructions:
 
@@ -49,8 +62,13 @@ Unsupported executable hashes fail closed. Do not remove the checks or guess new
    ├── mod.info
    ├── README.md
    ├── CHANGELOG.md
+   ├── AGENT_INSTALL.md
+   ├── install_shortcut.py
    ├── run_offline.py
    ├── verify_build.py
+   ├── docs/images/
+   │   ├── conquest-paused-orders.png
+   │   └── conquest-resumed-orders.png
    └── resource/script/gohse/
        ├── mod.json
        └── bootstrap.lua
@@ -84,14 +102,27 @@ Unsupported executable hashes fail closed. Do not remove the checks or guess new
    **Check copied Documents paths.** If the copy contains a Documents symlink to your real home/profile, replace that link **in the copy only** with a real private directory and copy the needed Gates of Hell profile into it. Do not alter the ordinary prefix or point this checkout at it. The launcher rejects a symlinked prefix, overlap with the ordinary prefix, and a game-profile path resolving outside the private prefix.
 
    To reuse a different existing private prefix, pass `--prefix /absolute/path/to/private-compatdata` on both `--check` and normal launch. It is never moved or bundled automatically.
-7. Check without launching:
+7. Inspect the shortcut installer, check its destinations, then install with approval:
+
+   ```bash
+   python3 install_shortcut.py --check
+   python3 install_shortcut.py --install
+   ```
+
+   Pass `--prefix /absolute/path/to/private-compatdata` to both commands when using another existing private prefix. The installer copies only the listed project files and creates a desktop shortcut; it does not install GOHSE, prepare a prefix, launch the game or change Steam.
+
+   Changed project files are backed up privately; unrelated or unmarked shortcuts are refused. To also make the shortcut executable and trusted, obtain explicit approval and add `--trust-shortcut`. Otherwise use the desktop's own reviewed “Allow Launching” action, or launch from a terminal.
+8. **Set up Steam manually.** Close other running Steam games first. In Gates of Hell's **Properties → General**, turn off Cloud **for this game only**. Use **Steam → Go Offline** and complete its confirmation. Leave Steam running. Do not edit login files or other games' settings.
+
+   Then check without launching:
 
    ```bash
    python3 run_offline.py --self-check
    python3 run_offline.py --check
    ```
 
-8. Launch:
+   Use the same `--prefix` if needed. The launcher deliberately refuses Online Mode or an enabled game-specific Cloud toggle; do not bypass that refusal.
+9. Launch from the desktop shortcut, or:
 
    ```bash
    python3 run_offline.py
@@ -105,7 +136,11 @@ Use the game's existing **Pause** binding to freeze/resume. Click or box-select 
 
 A passive **TACTICAL PAUSE — Orders enabled** indicator appears for paused Conquest while the game is foreground. Campaign missions keep their native indicator. No custom order recorder or replay queue is added.
 
-Quit through the game's menu for normal saving. **Do not enable Steam Online or Cloud while this launcher runs:** a failed continuing safety check forcibly ends only the isolated session, without saving. `Ctrl+C` also stops the session. After the game and launcher exit, you can restore Online Mode and this game's Cloud toggle. Progress in the private prefix remains separate; this project does not merge it into your normal saves.
+Quit through the game's menu for normal saving. **Do not enable Steam Online or Cloud while the isolated game runs:** a failed continuing safety check forcibly ends only that session, without saving. `Ctrl+C` also stops it.
+
+After **both the game and launcher have stopped**, restore your recorded Steam state manually: return Online if you changed it, then restore this game's original Cloud toggle. The launcher does not do that for you. Never enable Online/Cloud while the isolated game is still running.
+
+Progress in the private prefix remains separate. This project does not merge it into normal saves.
 
 ## How it works
 
@@ -122,13 +157,13 @@ Solo Conquest internally uses `page_scene_game_multi`, multiplayer client classe
 - Missing prerequisite or refused namespace/profile/hash: stop and resolve that exact prerequisite; do not remove guards. There is no automatic fallback to the ordinary prefix.
 - Loader logs: `<game>/gohse/logs/`. Game log: `<private-prefix>/pfx/drive_c/users/steamuser/Documents/my games/gates of hell/log/game.log`.
 - If the managed-pair message never appears, do not assume tactical pause is active. Check the installed file layout and loader log. A mismatched build is unsupported.
-- To disable discovery, close the game and move `gohse/mods/tactical_pause` **outside** `gohse/mods`, or remove only that installed mod folder. Renaming its folder inside the discovery directory is not sufficient. Leave other mods and their loader alone.
+- To stop using the mod, close the game and finish any pending Steam restoration first. Preserve private saves. Move `gohse/mods/tactical_pause` **outside** `gohse/mods` to disable discovery; renaming it inside the discovery directory is not sufficient. Leave other mods and their loader alone.
 - Ordinary launches without the scoped activation flag do not apply this mod's tactical-pause changes. Preserve your private saves before removing any private prefix.
 
 ## Credits, disclosure and licensing
 
 GOHSE by [nature2468](https://github.com/nature2468/gohse) provides the native hook/managed-patch API and its LuaJIT runtime. Its dependencies, including LuaJIT and MinHook, remain subject to their own notices; none is bundled here. This project is not affiliated with the game developers, Valve or GOHSE.
 
-Development used **OpenAI Codex GPT-6.1 Sol through OMP**, with read-only scout, code and security reviews. The behavior claims above come from actual game checks, not just generated code or static analysis. AI assistance and review do not establish that code or a third-party loader is safe.
+Development used **OpenAI Codex GPT-6.1 Sol through OMP**, with scout, implementation, code and security-review agents. The native-pause behavior claims above come from actual game checks, not just generated code or static analysis. AI assistance and review do not establish that code or a third-party loader is safe.
 
 No additional project license has been selected or granted. This is publicly available source, not a claim of MIT/Apache licensing. The game and external dependencies retain their respective rights.

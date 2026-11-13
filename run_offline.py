@@ -163,8 +163,7 @@ def wine_prefix(pid):
     return Path(os.fsdecode(value)).resolve() if value is not None else None
 
 
-def prerequisites():
-    safety_check()
+def installation_check():
     if not PREFIX.is_dir() or PREFIX.resolve() != PREFIX.absolute():
         raise RuntimeError("The existing disposable prefix must be a real, non-symlinked directory.")
     normal = (STEAM / "steamapps/compatdata/400750").resolve()
@@ -193,6 +192,11 @@ def prerequisites():
             continue
         if profile == (PREFIX / "pfx").resolve():
             raise RuntimeError("The disposable prefix already has a running game. Close that test first.")
+
+
+def prerequisites():
+    safety_check()
+    installation_check()
 
 
 def self_check():
@@ -292,9 +296,13 @@ def run():
             if exit_code is not None:
                 if exit_code != 0:
                     raise RuntimeError(f"Isolated runtime exited with status {exit_code}; inspect the game/GOHSE logs.")
+                if not mod_reported:
+                    raise RuntimeError("The isolated runtime exited before tactical-pause activation was verified.")
                 hud.quit()
                 return
             if client_handle is not None and select.select([client_handle], [], [], 0)[0]:
+                if not mod_reported:
+                    raise RuntimeError("The game client exited before tactical-pause activation was verified.")
                 hud.quit()
                 return
             if memory is None:
