@@ -9,21 +9,34 @@ local CONFIRMATIONS = {
 
 return {
 	OnLoad = function()
+		local function read_marker(path)
+			if io == nil or io.open == nil then
+				return nil
+			end
+			local open_ok, file = pcall(io.open, path, "r")
+			if not open_ok or file == nil then
+				return nil
+			end
+			local read_ok, content = pcall(function() return file:read("*a") end)
+			pcall(function() file:close() end)
+			if not read_ok then
+				return nil
+			end
+			return content
+		end
+
 		local source = debug.getinfo(1, "S").source
 		local script_path = source:sub(1, 1) == "@" and source:sub(2) or source
 		local mod_root = script_path:gsub("[/\\]resource[/\\]script[/\\]gohse[/\\]bootstrap%.lua$", "")
-		local marker_hash
-		if io ~= nil then
-			local marker = io.open(mod_root .. "/enable-tactical-pause", "r")
-			if marker then
-				marker_hash = marker:read("*a")
-				marker:close()
-			end
-		else
+		local marker_hash = read_marker(mod_root .. "/enable-tactical-pause")
+		if marker_hash == nil then
+			-- Marker missing/unreadable or sandboxed io: the documented env
+			-- fallback still requires the exact build hash, so this stays
+			-- fail-closed.
 			marker_hash = os.getenv("OMP_GOH_ENABLE_TACTICAL_PAUSE")
 		end
 		if marker_hash == nil then
-			Ext.Log("inert: enable-tactical-pause marker missing (or io unavailable)")
+			Ext.Log("inert: enable-tactical-pause marker unreadable and no OMP_GOH_ENABLE_TACTICAL_PAUSE fallback")
 			return
 		end
 		marker_hash = marker_hash:match("^%s*(.-)%s*$")

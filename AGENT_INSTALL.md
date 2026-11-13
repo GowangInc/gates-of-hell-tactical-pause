@@ -30,7 +30,7 @@ From the installed mod folder, run:
 python3 enable.py
 ```
 
-The helper locates the client using `verify_build.py`'s path logic, checks its exact SHA-256 and writes `enable-tactical-pause` in the mod folder with exactly this content and a final newline:
+The helper locates the client using `verify_build.py`'s path logic, checks its exact SHA-256 and writes `enable-tactical-pause` in the mod folder with exactly this content and a final newline. If Steam stores the game in a custom library the helper cannot find, pass the executable explicitly: `python3 enable.py --client "PATH/TO/steamapps/common/Call to Arms - Gates of Hell/binaries/x64/call_to_arms.exe"`.
 
 ```text
 4b6a807ad867c4f6eb1019376224d74fa3a6ac048355739ab0b76d73c7c0a267

@@ -48,7 +48,7 @@ Give your agent **[AGENT_INSTALL.md](AGENT_INSTALL.md)**. Review the actual inst
 1. **Close the game and back up your ordinary saves.** Let normal Steam Cloud synchronization finish. Steam Offline Mode and Cloud OFF for this game are optional recommendations, not requirements.
 2. Obtain the release ZIP or source repository. Install GOHSE's matching `version.dll` beside `call_to_arms.exe` (under `binaries/x64`). **Back up any existing `version.dll`; do not overwrite an unknown proxy or another loader.**
 3. Extract the `tactical_pause` folder into `<game>/gohse/mods/`, producing `<game>/gohse/mods/tactical_pause/`. Do not copy private data or the whole research workspace.
-4. From the extracted folder, run `python3 enable.py`. It verifies the client SHA-256 and creates `enable-tactical-pause` beside the mod files with exactly:
+4. From the extracted folder, run `python3 enable.py`. It verifies the client SHA-256 and creates `enable-tactical-pause` beside the mod files with exactly (use `--client PATH` if the game sits in a custom Steam library the helper cannot find):
 
    ```text
    4b6a807ad867c4f6eb1019376224d74fa3a6ac048355739ab0b76d73c7c0a267

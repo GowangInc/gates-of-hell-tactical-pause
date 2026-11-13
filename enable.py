@@ -13,10 +13,16 @@ MARKER = "enable-tactical-pause"
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.parse_args()
-    client = verify_build.locate_client()
+    parser.add_argument(
+        "--client",
+        type=Path,
+        metavar="PATH",
+        help="explicit path to call_to_arms.exe when Steam library discovery fails",
+    )
+    args = parser.parse_args()
+    client = args.client or verify_build.locate_client()
     if client is None:
-        print("REFUSED: GoH client not found. Install the game through Steam and locate this mod in that game's gohse/mods folder.")
+        print("REFUSED: GoH client not found; pass --client PATH to call_to_arms.exe.")
         return 1
     try:
         digest = hashlib.sha256(client.read_bytes()).hexdigest()
