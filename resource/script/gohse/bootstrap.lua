@@ -9,10 +9,26 @@ local CONFIRMATIONS = {
 
 return {
 	OnLoad = function()
-		-- The launcher verifies offline Steam, disabled Cloud and a loopback-only
-		-- namespace before setting this flag. Ordinary launches stay unmodified.
-		if os.getenv("OMP_GOH_OFFLINE_TACTICAL_PAUSE") ~= "1" then
-			Ext.Log("inactive: use run_offline.py for the isolated solo session")
+		local source = debug.getinfo(1, "S").source
+		local script_path = source:sub(1, 1) == "@" and source:sub(2) or source
+		local mod_root = script_path:gsub("[/\\]resource[/\\]script[/\\]gohse[/\\]bootstrap%.lua$", "")
+		local marker_hash
+		if io ~= nil then
+			local marker = io.open(mod_root .. "/enable-tactical-pause", "r")
+			if marker then
+				marker_hash = marker:read("*a")
+				marker:close()
+			end
+		else
+			marker_hash = os.getenv("OMP_GOH_ENABLE_TACTICAL_PAUSE")
+		end
+		if marker_hash == nil then
+			Ext.Log("inert: enable-tactical-pause marker missing (or io unavailable)")
+			return
+		end
+		marker_hash = marker_hash:match("^%s*(.-)%s*$")
+		if marker_hash:lower() ~= Ext.Game.SHA256:lower() then
+			Ext.Log("inert: marker build hash mismatch")
 			return
 		end
 		assert(Ext.ApiVersion == 1, "unsupported GOHSE API")
@@ -51,6 +67,6 @@ return {
 			assert(Ext.Memory.Read(target, #expected) == expected, "confirmation entry mismatch")
 			Ext.Hooks.Add(target, CONFIRM_SIGNATURE, confirmed_exit)
 		end
-		Ext.Log("offline tactical pause active: Pause toggles; RTS orders remain enabled")
+		Ext.Log("tactical pause 0.5.0 active: Pause toggles; RTS orders remain enabled")
 	end,
 }

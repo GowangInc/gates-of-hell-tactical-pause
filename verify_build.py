@@ -5,11 +5,39 @@ import hashlib
 import struct
 import sys
 from pathlib import Path
+from typing import Optional
 
-DEFAULT_EXE = (
+LINUX_DEFAULT_EXE = (
     Path.home() / ".steam/debian-installation/steamapps/common"
     / "Call to Arms - Gates of Hell/binaries/x64/call_to_arms.exe"
 )
+WINDOWS_STEAM_ROOTS = (
+    Path("C:/Program Files (x86)/Steam"),
+    Path("C:/Program Files/Steam"),
+    Path("D:/Steam"),
+    Path("D:/SteamLibrary"),
+    Path("E:/Steam"),
+    Path("E:/SteamLibrary"),
+)
+
+
+def client_candidates() -> tuple[Path, ...]:
+    """Return likely Steam client paths, preferring this host's native layout."""
+    relative = Path("steamapps/common/Call to Arms - Gates of Hell"
+                    "/binaries/x64/call_to_arms.exe")
+    if sys.platform == "win32":
+        return tuple(root / relative for root in WINDOWS_STEAM_ROOTS)
+    return (LINUX_DEFAULT_EXE,)
+
+
+def locate_client() -> Optional[Path]:
+    """Return the first existing default client path, or None."""
+    for candidate in client_candidates():
+        if candidate.is_file():
+            return candidate
+    return None
+
+
 EXPECTED_SHA256 = "4b6a807ad867c4f6eb1019376224d74fa3a6ac048355739ab0b76d73c7c0a267"
 TARGETS = {
     0x25C980: "48 89 5c 24 08 55 48 8d 6c 24 a9 48 81 ec c0 00",
@@ -54,8 +82,15 @@ def rva_offsets(data: bytes) -> dict[int, int]:
 
 
 def main() -> int:
-    path = Path(sys.argv[1]) if len(sys.argv) > 1 else DEFAULT_EXE
-    data = path.read_bytes()
+    path = Path(sys.argv[1]) if len(sys.argv) > 1 else locate_client()
+    if path is None:
+        print("FAIL: could not locate the GoH client; pass its path explicitly")
+        return 1
+    try:
+        data = path.read_bytes()
+    except OSError as error:
+        print(f"FAIL: cannot read client executable {path}: {error}")
+        return 1
     digest = hashlib.sha256(data).hexdigest()
     if digest != EXPECTED_SHA256:
         print(f"FAIL: unsupported SHA-256 for {path.name}: {digest}")

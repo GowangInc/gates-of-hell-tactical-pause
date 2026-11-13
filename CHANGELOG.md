@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0 — 2026-11-13
+
+- Replace the environment-flag activation gate with an exact-build opt-in marker checked by the mod.
+- Document Windows native and Linux/Proton Steam setup; Windows runtime behavior remains unverified.
+- Add a helper that verifies the client hash before creating the marker. Steam Offline Mode and Cloud OFF are optional recommendations; the isolated developer launcher remains available for testing.
+- State explicitly that the persistent marker affects every matching-build battle and multiplayer/co-op are unsupported.
+
 ## 0.4.0 — 2026-11-13
 
 - Add a read-only-by-default shortcut installer, explicit code allowlist, private unique backups, symlink/overlap refusal and opt-in shortcut trust.
